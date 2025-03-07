@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 
-const Board = ({ boardSize }: { boardSize: number }) => {
+const IMAGE_SOURCE = require("../assets/sample.jpg"); // 기본 제공 이미지
+
+const Board = ({ boardSize, isImageMode }: { boardSize: number, isImageMode: boolean }) => {
   const [tiles, setTiles] = useState<number[]>([]);
-  
+
   useEffect(() => {
     initializeBoard();
-  }, [boardSize]); // 보드 크기가 바뀔 때마다 퍼즐을 새로 초기화
+  }, [boardSize]);
 
   const initializeBoard = () => {
     let numbers = Array.from({ length: boardSize * boardSize }, (_, i) =>
@@ -62,13 +64,35 @@ const Board = ({ boardSize }: { boardSize: number }) => {
   };
 
   const renderTile = (value: number, index: number) => {
+    const tileSize = 300 / boardSize;
+    const row = Math.floor(index / boardSize);
+    const col = index % boardSize;
+
     return (
       <TouchableOpacity
         key={index}
-        style={[styles.tile, value === 0 && styles.emptyTile, { width: 300 / boardSize, height: 300 / boardSize }]}
+        style={[styles.tile, value === 0 && styles.emptyTile, { width: tileSize, height: tileSize }]}
         onPress={() => moveTile(index)}
       >
-        {value !== 0 && <Text style={styles.tileText}>{value}</Text>}
+        {value !== 0 &&
+          (isImageMode ? (
+            <Image
+              source={IMAGE_SOURCE}
+              style={{
+                width: 300,
+                height: 300,
+                position: "absolute",
+                top: -row * tileSize,
+                left: -col * tileSize,
+                clipPath: `polygon(${(col / boardSize) * 100}% ${(row / boardSize) * 100}%, 
+                                      ${(col / boardSize) * 100}% ${((row + 1) / boardSize) * 100}%, 
+                                      ${((col + 1) / boardSize) * 100}% ${((row + 1) / boardSize) * 100}%, 
+                                      ${((col + 1) / boardSize) * 100}% ${(row / boardSize) * 100}%)`,
+              }}
+            />
+          ) : (
+            <Text style={styles.tileText}>{value}</Text>
+          ))}
       </TouchableOpacity>
     );
   };
