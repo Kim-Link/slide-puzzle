@@ -9,10 +9,37 @@ const Board = () => {
     Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, i) => (i === BOARD_SIZE * BOARD_SIZE - 1 ? 0 : i + 1))
   );
 
-  // 타일을 렌더링하는 함수
+  // 빈 칸(0)의 위치 찾기
+  const emptyIndex = tiles.indexOf(0);
+
+  // 타일 이동 함수
+  const moveTile = (index: number) => {
+    const row = Math.floor(index / BOARD_SIZE);
+    const col = index % BOARD_SIZE;
+    const emptyRow = Math.floor(emptyIndex / BOARD_SIZE);
+    const emptyCol = emptyIndex % BOARD_SIZE;
+
+    // 상, 하, 좌, 우 이동 가능 여부 확인
+    const isAdjacent =
+      (row === emptyRow && Math.abs(col - emptyCol) === 1) ||
+      (col === emptyCol && Math.abs(row - emptyRow) === 1);
+
+    if (isAdjacent) {
+      // 빈 칸과 선택한 타일 위치 교체
+      const newTiles = [...tiles];
+      [newTiles[index], newTiles[emptyIndex]] = [newTiles[emptyIndex], newTiles[index]];
+      setTiles(newTiles);
+    }
+  };
+
+  // 타일 렌더링 함수
   const renderTile = (value: number, index: number) => {
     return (
-      <TouchableOpacity key={index} style={[styles.tile, value === 0 && styles.emptyTile]}>
+      <TouchableOpacity
+        key={index}
+        style={[styles.tile, value === 0 && styles.emptyTile]}
+        onPress={() => moveTile(index)}
+      >
         {value !== 0 && <Text style={styles.tileText}>{value}</Text>}
       </TouchableOpacity>
     );
