@@ -79,16 +79,13 @@ const Board = ({ boardSize, isImageMode }: { boardSize: number, isImageMode: boo
             <Image
               source={IMAGE_SOURCE}
               style={{
-                width: 300,
-                height: 300,
+                width: boardSize * tileSize,
+                height: boardSize * tileSize,
                 position: "absolute",
-                top: -row * tileSize,
-                left: -col * tileSize,
-                clipPath: `polygon(${(col / boardSize) * 100}% ${(row / boardSize) * 100}%, 
-                                      ${(col / boardSize) * 100}% ${((row + 1) / boardSize) * 100}%, 
-                                      ${((col + 1) / boardSize) * 100}% ${((row + 1) / boardSize) * 100}%, 
-                                      ${((col + 1) / boardSize) * 100}% ${(row / boardSize) * 100}%)`,
+                top: -Math.floor((value - 1) / boardSize) * tileSize,
+                left: -((value - 1) % boardSize) * tileSize,
               }}
+              resizeMode="cover"
             />
           ) : (
             <Text style={styles.tileText}>{value}</Text>
@@ -125,6 +122,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     backgroundColor: "#f0f0f0",
+    overflow: "hidden",
   },
   emptyTile: {
     backgroundColor: "#ddd",
