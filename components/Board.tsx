@@ -1,13 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
 const BOARD_SIZE = 3; // 3x3 퍼즐
 
+const shuffleArray = (array: number[]) => {
+  let shuffled = [...array];
+
+  // Fisher-Yates 알고리즘을 사용한 랜덤 섞기
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+};
+
 const Board = () => {
   // 초기 숫자 배열 (1~8 + 빈 칸(0))
-  const [tiles, setTiles] = useState(
-    Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, i) => (i === BOARD_SIZE * BOARD_SIZE - 1 ? 0 : i + 1))
-  );
+  const [tiles, setTiles] = useState<number[]>([]);
+
+  // 퍼즐을 랜덤하게 섞는 함수
+  const initializeBoard = () => {
+    let numbers = Array.from({ length: BOARD_SIZE * BOARD_SIZE }, (_, i) =>
+      i === BOARD_SIZE * BOARD_SIZE - 1 ? 0 : i + 1
+    );
+
+    let shuffled;
+    do {
+      shuffled = shuffleArray(numbers);
+    } while (!isSolvable(shuffled)); // 퍼즐이 풀 수 있는 상태인지 확인
+
+    setTiles(shuffled);
+  };
+
+  // 게임 시작 시 자동 섞기
+  useEffect(() => {
+    initializeBoard();
+  }, []);
+
+  // 퍼즐이 풀 수 있는 상태인지 확인하는 함수
+  const isSolvable = (board: number[]) => {
+    let inversions = 0;
+    for (let i = 0; i < board.length; i++) {
+      for (let j = i + 1; j < board.length; j++) {
+        if (board[i] && board[j] && board[i] > board[j]) {
+          inversions++;
+        }
+      }
+    }
+    return inversions % 2 === 0; // 짝수 개의 역순이 있어야 퍼즐 해결 가능
+  };
 
   // 빈 칸(0)의 위치 찾기
   const emptyIndex = tiles.indexOf(0);
